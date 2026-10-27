@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.contrib.auth.models import User
 class Booking(models.Model):
     name = models.CharField(max_length=255)
     no_of_guests = models.IntegerField()
@@ -33,3 +33,47 @@ class MenuItem(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Cart(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    menuitem = models.ForeignKey(MenuItem, on_delete=models.CASCADE)
+    quantity = models.SmallIntegerField()
+    unit_price = models.DecimalField(max_digits=6, decimal_places=2)
+    price = models.DecimalField(max_digits=6, decimal_places=2)
+
+    class Meta:
+        unique_together = ('menuitem', 'user')
+
+    def __str__(self):
+        return f'{self.user} - {self.menuitem}'
+
+
+class Order(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    delivery_crew = models.ForeignKey(
+        User,
+        related_name='delivery_crew',
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+    status = models.BooleanField(default=False, db_index=True)
+    total = models.DecimalField(max_digits=6, decimal_places=2)
+    date = models.DateField(auto_now_add=True, db_index=True)
+
+    def __str__(self):
+        return f'Order {self.id} - {self.user}'
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    menuitem = models.ForeignKey(MenuItem, on_delete=models.CASCADE)
+    quantity = models.SmallIntegerField()
+    unit_price = models.DecimalField(max_digits=6, decimal_places=2)
+    price = models.DecimalField(max_digits=6, decimal_places=2)
+
+    class Meta:
+        unique_together = ('order', 'menuitem')
+
+    def __str__(self):
+        return f'{self.order} - {self.menuitem}'

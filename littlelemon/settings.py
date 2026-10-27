@@ -11,7 +11,14 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
+# تحديد المسار الأساسي للمشروع
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# تحميل المتغيرات من ملف .env الموجود في جذر المشروع
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,8 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-kp@+y(f&^saxe&gli1lzcoy(h!@ej9jw2eapt36$_3a+en$+2x'
-
+SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -81,7 +87,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'LittleLemon',
         'USER': 'root',
-        'PASSWORD': '112001Qwe',  
+        'PASSWORD': os.getenv('DB_PASSWORD'),  
         'HOST': '127.0.0.1',
         'PORT': '3306',
         'OPTIONS': {

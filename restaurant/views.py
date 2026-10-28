@@ -14,7 +14,7 @@ from .serializers import (
     OrderSerializer,
 )
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
-from .permissions import IsManager
+from .permissions import IsManager, IsManagerOrDeliveryCrew
 
 class MenuItemsView(generics.ListCreateAPIView):
     queryset = MenuItem.objects.all()
@@ -97,6 +97,46 @@ class OrderView(generics.ListCreateAPIView):
             {'message': 'Order placed successfully.', 'order_id': order.id},
             status=status.HTTP_201_CREATED,
         )
+
+
+class SingleOrderView(generics.RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [IsAuthenticated()]
+        return [IsAuthenticated(), IsManagerOrDeliveryCrew()]
+
+    def patch(self, request, *args, **kwargs):
+        user = request.user
+        is_manager = user.groups.filter(name='Manager').exists()
+        is_delivery_crew = user.groups.filter(name='Delivery crew').exists()
+
+        if not (is_manager or is_delivery_crew):
+            return Response(
+                {'detail': 'You do not have permission to update this order.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        allowed_fields = {'delivery_crew', 'status'} if is_manager else {'status'}
+        unexpected_fields = set(request.data) - allowed_fields
+        if unexpected_fields:
+            return Response(
+                {'detail': 'You can only update permitted order fields.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        order = self.get_object()
+        serializer = self.get_serializer(
+            order,
+            data=request.data,
+            partial=True,
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ManagersView(APIView):

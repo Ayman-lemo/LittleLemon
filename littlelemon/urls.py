@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from restaurant import views
-
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 router = DefaultRouter()
 router.register(r'tables', views.BookingViewSet)
@@ -13,5 +13,8 @@ urlpatterns = [
     path('restaurant/booking/', include(router.urls)),
     
     path('auth/', include('djoser.urls')),
-    path('auth/', include('djoser.urls.authtoken')), 
+    path('auth/', include('djoser.urls.authtoken')),
+    
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'), 
 ]

@@ -19,6 +19,9 @@ from .permissions import IsManager, IsManagerOrDeliveryCrew
 class MenuItemsView(generics.ListCreateAPIView):
     queryset = MenuItem.objects.all()
     serializer_class = MenuItemSerializer
+    filterset_fields = ['category', 'featured']
+    search_fields = ['title']
+    ordering_fields = ['price', 'category']
 
     def get_permissions(self):
         if self.request.method == 'GET':

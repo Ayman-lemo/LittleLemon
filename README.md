@@ -1,3 +1,5 @@
+https://aymandev.pythonanywhere.com/api/docs/
+
 # Little Lemon - Restaurant API 🍋
 
 This is a comprehensive RESTful API built with **Django REST Framework (DRF)** for the **Meta Back-End Developer Professional Certificate** Capstone Project. 
